@@ -1,0 +1,11 @@
+﻿.consumed-row {
+    background-color: green;
+}
+
+.expired-row {
+    background-color: red;
+}
+
+.close-to-expire-row {
+    background-color: orange;
+}

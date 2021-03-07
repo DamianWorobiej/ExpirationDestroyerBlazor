@@ -1,0 +1,157 @@
+﻿@page "/"
+@inject IProductsService Products
+@using ExpirationDestroyerBlazorServer.BusinessLogic.ProductsService
+@using ExpirationDestroyerBlazorServer.BusinessLogic.DTOs
+
+<div id="modalDialog" class="modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <EditForm Model="@Product">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+
+                    <div class="form-group d-flex justify-content-between">
+                        <label class="col-form-label col-3" for="name">Name</label>
+                        <InputText @bind-Value="@Product.Name" id="name" Class="form-control" />
+                    </div>
+                    <div class="form-group d-flex justify-content-between">
+                        <label class="col-form-label col-3" for="expiration-date">Expiration Date</label>
+                        <InputDate class="form-control" id="expiration-date" @bind-Value="Product.ExpirationDate" />
+                    </div>
+                    <button type="button" @onclick="@SubmitHandler" class="btn btn-primary" data-dismiss="modal">Submit</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
+<button data-toggle="modal" data-target="#modalDialog" class="btn btn-primary" style="width:100%; margin-bottom:70px;" @onclick="@ClearProduct">New</button>
+
+@if (!ProductsList.Any())
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+
+    <table style="width:100%;border-collapse: separate;border-spacing: 0 1em;">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Expiration date</th>
+                <th>Consume</th>
+                <th>Edit</th>
+                <th>Delete</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var prod in ProductsList)
+            {
+                <tr style="border: 2px solid black" class="@(ProductRowClass(prod))">
+                    <td>@prod.Name</td>
+                    <td>@prod.ExpirationDate.ToString("dd-MM-yyyy")</td>
+                    <td><button class="btn btn-success" @onclick="@(e => ConsumeProduct(prod.ID))">Consumed</button></td>
+                    <td><button class="btn btn-primary" id="edit-@prod.ID" data-toggle="modal" data-target="#modalDialog" @onclick="@(e => EditProduct(prod.ID))">Edit</button></td>
+                    <td><button class="btn btn-danger" id="delete-@prod.ID" @onclick="@(e => DeleteProduct(prod.ID))">Delete</button></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+
+    private ProductDTO Product = new ProductDTO()
+    {
+        ExpirationDate = DateTime.Today
+    };
+    private List<ProductDTO> ProductsList = new List<ProductDTO>();
+    private bool IsEdited;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var prod = await Products.GetAllAsync();
+
+        ProductsList = prod.ToList();
+    }
+
+    private async void SubmitHandler()
+    {
+        Console.WriteLine("Submitted");
+
+        if (IsEdited)
+        {
+            await Products.UpdateAsync(Product);
+            var prod = ProductsList.First(p => p.ID == Product.ID);
+            var index = ProductsList.IndexOf(prod);
+            ProductsList[index] = Product;
+        }
+        else
+        {
+            int productId = await Products.AddAsync(Product);
+            Product.ID = productId;
+            ProductsList.Add(Product);
+        }
+
+        StateHasChanged();
+    }
+
+    private void ClearProduct()
+    {
+        Product = new ProductDTO()
+        {
+            ExpirationDate = DateTime.Today
+        };
+        IsEdited = false;
+    }
+
+    private void EditProduct(int id)
+    {
+        Product = ProductsList.First(p => p.ID == id).Clone();
+        IsEdited = true;
+    }
+
+    private async void ConsumeProduct(int id)
+    {
+        await Products.SetAsConsumedAsync(id);
+        var prod = ProductsList.First(p => p.ID == id);
+        var index = ProductsList.IndexOf(prod);
+        ProductsList[index].Consumed = true;
+        StateHasChanged();
+    }
+
+    private async void DeleteProduct(int id)
+    {
+        await Products.DeleteAsync(id);
+
+        foreach (var item in ProductsList)
+        {
+            Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(item));
+        }
+
+        var prod = ProductsList.First(p => p.ID == id);
+        ProductsList.Remove(prod);
+        StateHasChanged();
+    }
+
+    private string ProductRowClass(ProductDTO product)
+    {
+        if (product.Consumed)
+        {
+            return "consumed-row";
+        }
+
+        if (product.Expired)
+        {
+            return "expired-row";
+        }
+
+        if (product.ExpirationDate <= DateTime.Now.AddDays(7))
+        {
+            return "close-to-expire-row";
+        }
+
+        return string.Empty;
+    }
+}

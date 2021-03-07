@@ -1,1 +1,1 @@
-# ExpirationDestroyerBlazor
+# ExpirationDestroyerBlazor Server
