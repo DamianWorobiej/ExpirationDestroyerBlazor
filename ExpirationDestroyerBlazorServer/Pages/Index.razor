@@ -78,8 +78,6 @@ else
 
     private async void SubmitHandler()
     {
-        Console.WriteLine("Submitted");
-
         if (IsEdited)
         {
             await Products.UpdateAsync(Product);
@@ -124,11 +122,6 @@ else
     private async void DeleteProduct(int id)
     {
         await Products.DeleteAsync(id);
-
-        foreach (var item in ProductsList)
-        {
-            Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(item));
-        }
 
         var prod = ProductsList.First(p => p.ID == id);
         ProductsList.Remove(prod);
