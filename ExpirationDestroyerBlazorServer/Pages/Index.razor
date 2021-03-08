@@ -92,6 +92,7 @@ else
             ProductsList.Add(Product);
         }
 
+        ProductsList = ProductsList.OrderBy(p => p.ExpirationDate).ToList();
         StateHasChanged();
     }
 
