@@ -73,7 +73,7 @@ else
     {
         var prod = await Products.GetAllAsync();
 
-        ProductsList = prod.ToList();
+        ProductsList = prod.OrderBy(p => p.ExpirationDate).ToList();
     }
 
     private async void SubmitHandler()
