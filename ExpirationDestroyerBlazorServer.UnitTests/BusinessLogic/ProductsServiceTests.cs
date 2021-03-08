@@ -11,7 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace ExpirationDestroyerBlazorServer.UnitTests
+namespace ExpirationDestroyerBlazorServer.UnitTests.BusinessLogic
 {
     [TestClass]
     public class ProductsServiceTests
