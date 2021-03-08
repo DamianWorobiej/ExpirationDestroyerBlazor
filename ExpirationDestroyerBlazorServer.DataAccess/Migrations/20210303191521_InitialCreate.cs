@@ -15,7 +15,6 @@ namespace ExpirationDestroyerBlazorServer.DataAccess.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     Name = table.Column<string>(type: "TEXT", nullable: true),
                     ExpirationDate = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    Expired = table.Column<bool>(type: "INTEGER", nullable: false),
                     Consumed = table.Column<bool>(type: "INTEGER", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
