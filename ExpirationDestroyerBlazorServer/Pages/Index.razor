@@ -71,7 +71,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        var prod = await Products.GetAllAsync();
+        var prod = await Products.GetAllNotConsumedAsync();
 
         ProductsList = prod.OrderBy(p => p.ExpirationDate).ToList();
     }
@@ -115,8 +115,7 @@ else
     {
         await Products.SetAsConsumedAsync(id);
         var prod = ProductsList.First(p => p.ID == id);
-        var index = ProductsList.IndexOf(prod);
-        ProductsList[index].Consumed = true;
+        ProductsList.Remove(prod);
         StateHasChanged();
     }
 
