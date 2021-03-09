@@ -12,11 +12,11 @@
                     <ValidationSummary />
 
                     <div class="form-group d-flex justify-content-between">
-                        <label class="col-form-label col-3" for="name">Name</label>
+                        <label class="col-form-label col-3" for="name">Nazwa</label>
                         <InputText @bind-Value="@Product.Name" id="name" Class="form-control" />
                     </div>
                     <div class="form-group d-flex justify-content-between">
-                        <label class="col-form-label col-3" for="expiration-date">Expiration Date</label>
+                        <label class="col-form-label col-3" for="expiration-date">Data przydatności</label>
                         <InputDate class="form-control" id="expiration-date" @bind-Value="Product.ExpirationDate" />
                     </div>
                     <button type="button" @onclick="@SubmitHandler" class="btn btn-primary" data-dismiss="modal">Submit</button>
@@ -26,7 +26,10 @@
         </div>
     </div>
 </div>
-<button data-toggle="modal" data-target="#modalDialog" class="btn btn-primary" style="width:100%; margin-bottom:70px;" @onclick="@ClearProduct">New</button>
+<button data-toggle="modal" data-target="#modalDialog" class="btn btn-primary" style="width:100%; margin-bottom:70px;" @onclick="@ClearProduct">Nowy produkt</button>
+
+<button id="filter-button-not-consumed" type="button" class="btn @(Filter == Filters.AllNotConsumed ? "btn-info" : "btn-info-outline filter-button")" @onclick="(e => RefreshList(Filters.AllNotConsumed))">Nie zjedzone</button>
+<button id="filter-button-all" type="button" class="btn @(Filter == Filters.All ? "btn-info" : "btn-info-outline filter-button")" @onclick="(e => RefreshList(Filters.All))">Wszystkie</button>
 
 @if (!ProductsList.Any())
 {
@@ -38,11 +41,11 @@ else
     <table style="width:100%;border-collapse: separate;border-spacing: 0 1em;">
         <thead>
             <tr>
-                <th>Name</th>
-                <th>Expiration date</th>
-                <th>Consume</th>
-                <th>Edit</th>
-                <th>Delete</th>
+                <th>Nazwa</th>
+                <th>Data przydatności</th>
+                <th>Zjedzone</th>
+                <th>Edytuj</th>
+                <th>Usuń</th>
             </tr>
         </thead>
         <tbody>
@@ -51,9 +54,9 @@ else
                 <tr style="border: 2px solid black" class="@(ProductRowClass(prod))">
                     <td>@prod.Name</td>
                     <td>@prod.ExpirationDate.ToString("dd-MM-yyyy")</td>
-                    <td><button class="btn btn-success" @onclick="@(e => ConsumeProduct(prod.ID))">Consumed</button></td>
-                    <td><button class="btn btn-primary" id="edit-@prod.ID" data-toggle="modal" data-target="#modalDialog" @onclick="@(e => EditProduct(prod.ID))">Edit</button></td>
-                    <td><button class="btn btn-danger" id="delete-@prod.ID" @onclick="@(e => DeleteProduct(prod.ID))">Delete</button></td>
+                    <td><button class="btn btn-success" @onclick="@(e => ConsumeProduct(prod.ID))">Zjedzone</button></td>
+                    <td><button class="btn btn-primary" id="edit-@prod.ID" data-toggle="modal" data-target="#modalDialog" @onclick="@(e => EditProduct(prod.ID))">Edytuj</button></td>
+                    <td><button class="btn btn-danger" id="delete-@prod.ID" @onclick="@(e => DeleteProduct(prod.ID))">Usuń</button></td>
                 </tr>
             }
         </tbody>
@@ -62,18 +65,57 @@ else
 
 @code {
 
+    enum Filters
+    {
+        AllNotConsumed,
+        All
+    }
+
     private ProductDTO Product = new ProductDTO()
     {
         ExpirationDate = DateTime.Today
     };
     private List<ProductDTO> ProductsList = new List<ProductDTO>();
     private bool IsEdited;
+    private Filters Filter;
+
 
     protected override async Task OnInitializedAsync()
+    {
+        Filter = Filters.AllNotConsumed;
+        await this.RefreshList(Filter);
+    }
+
+    private async Task GetAllNotConsumed()
     {
         var prod = await Products.GetAllNotConsumedAsync();
 
         ProductsList = prod.OrderBy(p => p.ExpirationDate).ToList();
+    }
+
+    private async Task GetAll()
+    {
+        var prod = await Products.GetAllAsync();
+
+        ProductsList = prod.OrderBy(p => p.ExpirationDate).ToList();
+    }
+
+    private async Task RefreshList(Filters filter)
+    {
+        switch (filter)
+        {
+            case Filters.AllNotConsumed:
+                await this.GetAllNotConsumed();
+                break;
+            case Filters.All:
+                await this.GetAll();
+                break;
+            default:
+                break;
+        }
+
+        Filter = filter;
+        StateHasChanged();
     }
 
     private async void SubmitHandler()
