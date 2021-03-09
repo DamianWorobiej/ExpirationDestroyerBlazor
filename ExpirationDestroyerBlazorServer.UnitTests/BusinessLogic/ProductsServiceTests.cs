@@ -347,5 +347,66 @@ namespace ExpirationDestroyerBlazorServer.UnitTests.BusinessLogic
         }
 
         #endregion
+
+        #region GetAllNotConsumed
+
+        [TestMethod]
+        public async Task GetAllNotConsumedAsync_GetNotConsumedProducts()
+        {
+            var productsModels = new List<Product>()
+            {
+                new Product()
+                {
+                    ID = 0,
+                    Name = "0",
+
+                },
+                new Product()
+                {
+                    ID = 1,
+                    Name = "1",
+                    Consumed = true
+                },
+                new Product()
+                {
+                    ID = 2,
+                    Name = "2",
+                }
+            };
+
+            _mock.Setup(repo => repo.GetAllAsync()).Returns(async () => productsModels);
+            this.CreateService();
+
+            var all = await _service.GetAllNotConsumedAsync();
+
+            Assert.AreEqual(2, all.Count());
+            Assert.AreEqual(0, all.ElementAt(0).ID);
+            Assert.AreEqual(2, all.ElementAt(1).ID);
+        }
+
+        [TestMethod]
+        public async Task GetAllNotConsumedAsync_GetsEmptyCollectiinOnAllConsumed()
+        {
+            var models = new List<Product>()
+            {
+                new Product()
+                {
+                    Consumed = true
+                },
+                new Product()
+                {
+                    Consumed = true
+                }
+            };
+
+            _mock.Setup(repo => repo.GetAllAsync()).Returns(async () => models);
+            this.CreateService();
+
+            var all = await _service.GetAllNotConsumedAsync();
+
+            Assert.AreEqual(0, all.Count());
+        }
+
+        #endregion
     }
 }

@@ -63,6 +63,12 @@ namespace ExpirationDestroyerBlazorServer.BusinessLogic.ProductsService
             return _mapper.Map<IEnumerable<ProductDTO>>(modelsCollection);
         }
 
+        public async Task<IEnumerable<ProductDTO>> GetAllNotConsumedAsync()
+        {
+            var allModels = await _productsRepository.GetAllAsync();
+            return _mapper.Map<IEnumerable<ProductDTO>>(allModels.Where(m => m.Consumed == false));
+        }
+
         public ProductDTO GetById(int id)
         {
             var productModel = _productsRepository.GetById(id);

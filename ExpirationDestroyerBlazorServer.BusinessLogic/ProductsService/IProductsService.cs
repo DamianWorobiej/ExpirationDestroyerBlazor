@@ -24,6 +24,8 @@ namespace ExpirationDestroyerBlazorServer.BusinessLogic.ProductsService
 
         Task<IEnumerable<ProductDTO>> GetAllAsync();
 
+        Task<IEnumerable<ProductDTO>> GetAllNotConsumedAsync();
+
         ProductDTO GetById(int id);
 
         Task<ProductDTO> GetByIdAsync(int id);
