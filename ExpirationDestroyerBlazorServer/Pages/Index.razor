@@ -1,6 +1,8 @@
 ﻿@page "/"
 @inject IProductsService Products
+@inject IJSRuntime JsRuntime;
 @using ExpirationDestroyerBlazorServer.BusinessLogic.ProductsService
+@using ExpirationDestroyerBlazorServer.BusinessLogic.Exceptions
 @using ExpirationDestroyerBlazorServer.BusinessLogic.DTOs
 
 <div id="modalDialog" class="modal" tabindex="-1" role="dialog">
@@ -126,14 +128,33 @@ else
     {
         if (IsEdited)
         {
-            await Products.UpdateAsync(Product);
+            try
+            {
+                await Products.UpdateAsync(Product);
+            }
+            catch (InvalidProductDataException e)
+            {
+                await JsRuntime.InvokeVoidAsync("alert", e.Message);
+                return;
+            }
+
             var prod = ProductsList.First(p => p.ID == Product.ID);
             var index = ProductsList.IndexOf(prod);
             ProductsList[index] = Product;
         }
         else
         {
-            int productId = await Products.AddAsync(Product);
+            int productId;
+            try
+            {
+                productId = await Products.AddAsync(Product);
+            }
+            catch (InvalidProductDataException e)
+            {
+                await JsRuntime.InvokeVoidAsync("alert", e.Message);
+                return;
+            }
+
             Product.ID = productId;
             ProductsList.Add(Product);
             Product = new ProductDTO()

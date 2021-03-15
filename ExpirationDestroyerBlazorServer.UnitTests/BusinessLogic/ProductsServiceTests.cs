@@ -1,5 +1,6 @@
 using AutoMapper;
 using ExpirationDestroyerBlazorServer.BusinessLogic.DTOs;
+using ExpirationDestroyerBlazorServer.BusinessLogic.Exceptions;
 using ExpirationDestroyerBlazorServer.BusinessLogic.Mappers;
 using ExpirationDestroyerBlazorServer.BusinessLogic.ProductsService;
 using ExpirationDestroyerBlazorServer.DataAccess;
@@ -46,7 +47,7 @@ namespace ExpirationDestroyerBlazorServer.UnitTests.BusinessLogic
         {
             this.CreateService();
 
-            _service.Add(new ProductDTO());
+            _service.Add(new ProductDTO() { Name = "Test" });
 
             _mock.Verify(repo => repo.Add(It.IsAny<Product>()), Times.Once);
         }
@@ -56,7 +57,7 @@ namespace ExpirationDestroyerBlazorServer.UnitTests.BusinessLogic
         {
             this.CreateService();
 
-            await _service.AddAsync(new ProductDTO());
+            await _service.AddAsync(new ProductDTO() { Name = "Test" });
 
             _mock.Verify(repo => repo.AddAsync(It.IsAny<Product>()), Times.Once);
         }
@@ -67,7 +68,7 @@ namespace ExpirationDestroyerBlazorServer.UnitTests.BusinessLogic
             _mock.Setup(repo => repo.Add(It.IsAny<Product>())).Returns(1);
             this.CreateService();
 
-            var id = _service.Add(new ProductDTO());
+            var id = _service.Add(new ProductDTO() { Name = "Test" });
 
             Assert.AreEqual(1, id);
         }
@@ -78,9 +79,25 @@ namespace ExpirationDestroyerBlazorServer.UnitTests.BusinessLogic
             _mock.Setup(repo => repo.AddAsync(It.IsAny<Product>())).Returns(async () => 1);
             this.CreateService();
 
-            var id = await _service.AddAsync(new ProductDTO());
+            var id = await _service.AddAsync(new ProductDTO() { Name = "Test" });
 
             Assert.AreEqual(1, id);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidProductDataException))]
+        public async Task AddAsync_ThrowsInvalidProductDataExceptionOnEmptyName()
+        {
+            this.CreateService();
+            await _service.AddAsync(new ProductDTO());
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidProductDataException))]
+        public void Add_ThrowsInvalidProductDataExceptionOnEmptyName()
+        {
+            this.CreateService();
+            _service.Add(new ProductDTO());
         }
 
         #endregion
@@ -248,7 +265,7 @@ namespace ExpirationDestroyerBlazorServer.UnitTests.BusinessLogic
         {
             this.CreateService();
 
-            _service.Update(new ProductDTO());
+            _service.Update(new ProductDTO() { Name = "Test" });
 
             _mock.Verify(repo => repo.Update(It.IsAny<Product>()), Times.Once);
         }
@@ -258,9 +275,25 @@ namespace ExpirationDestroyerBlazorServer.UnitTests.BusinessLogic
         {
             this.CreateService();
 
-            await _service.UpdateAsync(new ProductDTO());
+            await _service.UpdateAsync(new ProductDTO() { Name = "Test" });
 
             _mock.Verify(repo => repo.UpdateAsync(It.IsAny<Product>()), Times.Once);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidProductDataException))]
+        public async Task UpdateAsync_ThrowsInvalidProductDataOnEmptyNam()
+        {
+            this.CreateService();
+            await _service.UpdateAsync(new ProductDTO() { ID = 1 });
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidProductDataException))]
+        public void Update_ThrowsInvalidProductDataOnEmptyNam()
+        {
+            this.CreateService();
+            _service.Update(new ProductDTO() { ID = 1 });
         }
 
         #endregion
@@ -274,7 +307,7 @@ namespace ExpirationDestroyerBlazorServer.UnitTests.BusinessLogic
             {
                 Consumed = false
             };
-            _mock.Setup(repo => repo.GetById(It.IsAny<int>())).Returns(new Product());
+            _mock.Setup(repo => repo.GetById(It.IsAny<int>())).Returns(new Product() { Name = "Test" });
             _mock.Setup(repo => repo.Update(It.IsAny<Product>()))
                     .Callback<Product>((obj) => model = obj);
             this.CreateService();
@@ -297,7 +330,7 @@ namespace ExpirationDestroyerBlazorServer.UnitTests.BusinessLogic
         [TestMethod]
         public void SetAsConsumed_CallsRepoGetByIdAndUpdateOnce()
         {
-            _mock.Setup(repo => repo.GetById(It.IsAny<int>())).Returns(new Product());
+            _mock.Setup(repo => repo.GetById(It.IsAny<int>())).Returns(new Product() { Name = "Test" });
             this.CreateService();
 
             _service.SetAsConsumed(0);
@@ -313,7 +346,7 @@ namespace ExpirationDestroyerBlazorServer.UnitTests.BusinessLogic
             {
                 Consumed = false
             };
-            _mock.Setup(repo => repo.GetByIdAsync(It.IsAny<int>())).Returns(async () => new Product());
+            _mock.Setup(repo => repo.GetByIdAsync(It.IsAny<int>())).Returns(async () => new Product() { Name = "Test" });
             _mock.Setup(repo => repo.UpdateAsync(It.IsAny<Product>()))
                     .Callback<Product>((obj) => model = obj);
             this.CreateService();
@@ -337,7 +370,7 @@ namespace ExpirationDestroyerBlazorServer.UnitTests.BusinessLogic
         [TestMethod]
         public async Task SetAsConsumedAsync_CallsRepoGetByIdAndUpdateOnce()
         {
-            _mock.Setup(repo => repo.GetByIdAsync(It.IsAny<int>())).Returns(async () => new Product());
+            _mock.Setup(repo => repo.GetByIdAsync(It.IsAny<int>())).Returns(async () => new Product() { Name = "Test" });
             this.CreateService();
 
             await _service.SetAsConsumedAsync(0);

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using ExpirationDestroyerBlazorServer.BusinessLogic.DTOs;
+using ExpirationDestroyerBlazorServer.BusinessLogic.Exceptions;
 using ExpirationDestroyerBlazorServer.DataAccess;
 using ExpirationDestroyerBlazorServer.DataAccess.Exceptions;
 using ExpirationDestroyerBlazorServer.DataAccess.Models;
@@ -24,15 +25,22 @@ namespace ExpirationDestroyerBlazorServer.BusinessLogic.ProductsService
 
         public int Add(ProductDTO product)
         {
+            this.AddCommonProcess(product);
             var productModel = this._mapper.Map<Product>(product);
             return _productsRepository.Add(productModel);
         }
 
         public async Task<int> AddAsync(ProductDTO product)
         {
+            this.AddCommonProcess(product);
             var productModel = this._mapper.Map<Product>(product);
             int id = await _productsRepository.AddAsync(productModel);
             return id;
+        }
+
+        private void AddCommonProcess(ProductDTO product)
+        {
+            this.CommonValidateProduct(product);
         }
 
         public void Delete(ProductDTO product)
@@ -123,14 +131,29 @@ namespace ExpirationDestroyerBlazorServer.BusinessLogic.ProductsService
 
         public void Update(ProductDTO product)
         {
+            this.UpdateCommonProcess(product);
             var productModel = this._mapper.Map<Product>(product);
             _productsRepository.Update(productModel);
         }
 
         public async Task UpdateAsync(ProductDTO product)
         {
+            this.UpdateCommonProcess(product);
             var productModel = this._mapper.Map<Product>(product);
             await _productsRepository.UpdateAsync(productModel);
+        }
+
+        private void UpdateCommonProcess(ProductDTO product)
+        {
+            this.CommonValidateProduct(product);
+        }
+
+        private void CommonValidateProduct(ProductDTO product)
+        {
+            if (string.IsNullOrEmpty(product.Name))
+            {
+                throw new InvalidProductDataException("You must specify product's name");
+            }
         }
     }
 }
