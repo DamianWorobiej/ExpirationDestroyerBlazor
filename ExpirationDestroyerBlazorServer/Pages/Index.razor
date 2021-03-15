@@ -19,7 +19,11 @@
                         <label class="col-form-label col-3" for="expiration-date">Data przydatności</label>
                         <InputDate class="form-control" id="expiration-date" @bind-Value="Product.ExpirationDate" />
                     </div>
-                    <button type="button" @onclick="@SubmitHandler" class="btn btn-primary" data-dismiss="modal">Submit</button>
+                    <button type="button" @onclick="@SubmitHandler" class="btn btn-primary" data-dismiss="@(IsEdited == true ? "modal" : "")">Zapisz</button>
+                    @if (!IsEdited)
+                    {
+                        <button type="button" @onclick="@SubmitHandler" class="btn btn-primary" data-dismiss="modal">Zapisz i zamknij okno</button>
+                    }
                     <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
                 </EditForm>
             </div>
@@ -132,6 +136,10 @@ else
             int productId = await Products.AddAsync(Product);
             Product.ID = productId;
             ProductsList.Add(Product);
+            Product = new ProductDTO()
+            {
+                ExpirationDate = DateTime.Now
+            };
         }
 
         ProductsList = ProductsList.OrderBy(p => p.ExpirationDate).ToList();
