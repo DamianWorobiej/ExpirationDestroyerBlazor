@@ -7,6 +7,10 @@
 }
 
 .close-to-expire-row {
+    background-color: yellow;
+}
+
+.nearly-expired-row {
     background-color: orange;
 }
 

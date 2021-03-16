@@ -211,7 +211,12 @@ else
             return "expired-row";
         }
 
-        if (product.ExpirationDate <= DateTime.Now.AddDays(7))
+        if (product.ExpirationDate <= DateTime.Today.AddDays(2))
+        {
+            return "nearly-expired-row";
+        }
+
+        if (product.ExpirationDate <= DateTime.Today.AddDays(7))
         {
             return "close-to-expire-row";
         }
