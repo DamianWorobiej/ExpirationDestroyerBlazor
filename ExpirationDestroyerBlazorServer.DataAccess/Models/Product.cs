@@ -16,7 +16,9 @@ namespace ExpirationDestroyerBlazorServer.DataAccess.Models
         {
             get
             {
-                return this.ExpirationDate < DateTime.Now;
+                // Comparing DateTime with time part is bullshit. Just putting it up there.
+                // Resolved just by date instead.
+                return DateTime.Today.Date > this.ExpirationDate.Date;
             }
         }
 

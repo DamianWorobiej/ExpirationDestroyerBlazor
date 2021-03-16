@@ -27,6 +27,10 @@ namespace ExpirationDestroyerBlazorServer.UnitTests.DataAccess
             };
 
             Assert.IsFalse(model.Expired);
+
+            model.ExpirationDate = DateTime.Now;
+
+            Assert.IsFalse(model.Expired);
         }
     }
 }
