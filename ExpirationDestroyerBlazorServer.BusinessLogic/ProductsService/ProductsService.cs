@@ -38,6 +38,27 @@ namespace ExpirationDestroyerBlazorServer.BusinessLogic.ProductsService
             return id;
         }
 
+        public async Task<List<int>> AddMultipleAsync(ProductDTO product, int copies)
+        {
+            this.AddCommonProcess(product);
+
+            if (copies <= 0)
+            {
+                throw new ArgumentException("You must specify positive amount of copies");
+            }
+
+            var productModel = this._mapper.Map<Product>(product);
+            var outputList = new List<int>();
+
+            for (int i = 0; i < copies; i++)
+            {
+                var id = await _productsRepository.AddAsync(productModel);
+                outputList.Add(id);
+            }
+
+            return outputList;
+        }
+
         private void AddCommonProcess(ProductDTO product)
         {
             this.CommonValidateProduct(product);

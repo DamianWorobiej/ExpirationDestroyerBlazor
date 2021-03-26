@@ -8,6 +8,7 @@ using ExpirationDestroyerBlazorServer.DataAccess.Exceptions;
 using ExpirationDestroyerBlazorServer.DataAccess.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -98,6 +99,60 @@ namespace ExpirationDestroyerBlazorServer.UnitTests.BusinessLogic
         {
             this.CreateService();
             _service.Add(new ProductDTO());
+        }
+
+        #endregion
+
+        #region AddMultiple
+
+        [TestMethod]
+        public async Task AddMultipleAsync_CallsRepoAddAsyncDesiredTimes()
+        {
+            var copies = 4;
+            var model = new ProductDTO()
+            {
+                Name = "Test"
+            };
+
+            this.CreateService();
+            await _service.AddMultipleAsync(model, copies);
+
+            _mock.Verify(repo => repo.AddAsync(It.IsAny<Product>()), Times.Exactly(copies));
+        }
+
+        [TestMethod]
+        public async Task AddMultipleAsync_AddsMultipleProducts()
+        {
+            var id = -1;
+            var copies = 4;
+            var model = new ProductDTO()
+            {
+                Name = "Test"
+            };
+
+            _mock.Setup(repo => repo.AddAsync(It.IsAny<Product>()))
+                .Callback(() => id++)
+                .Returns(async () => id);
+            this.CreateService();
+
+            var ids = await _service.AddMultipleAsync(model, copies);
+
+            var expectedIds = new List<int>() { 0, 1, 2, 3 };
+            CollectionAssert.AreEqual(expectedIds, ids);
+        }
+
+        [TestMethod]
+        public async Task AddMultipleAsync_ThrowsArgumentExceptionOnNonPositiveCopies()
+        {
+            this.CreateService();
+            var model = new ProductDTO()
+            {
+                Name = "Test"
+            };
+
+            await Assert.ThrowsExceptionAsync<ArgumentException>(() => _service.AddMultipleAsync(model, 0));
+            await Assert.ThrowsExceptionAsync<ArgumentException>(() => _service.AddMultipleAsync(model, -1));
+            await Assert.ThrowsExceptionAsync<ArgumentException>(() => _service.AddMultipleAsync(model, -10));
         }
 
         #endregion

@@ -10,6 +10,8 @@ namespace ExpirationDestroyerBlazorServer.BusinessLogic.ProductsService
 
         Task<int> AddAsync(ProductDTO product);
 
+        Task<List<int>> AddMultipleAsync(ProductDTO product, int copies);
+
         void Update(ProductDTO product);
 
         Task UpdateAsync(ProductDTO product);
