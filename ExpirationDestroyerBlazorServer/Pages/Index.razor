@@ -21,11 +21,15 @@
                         <label class="col-form-label col-3" for="expiration-date">Data przydatności</label>
                         <InputDate class="form-control" id="expiration-date" @bind-Value="Product.ExpirationDate" />
                     </div>
-                    <button type="button" @onclick="@SubmitHandler" class="btn btn-primary" data-dismiss="@(IsEdited == true ? "modal" : "")">Zapisz</button>
                     @if (!IsEdited)
                     {
+                        <div class="form-group d-flex justify-content-between">
+                            <label class="col-form-label col-3" for="amount">Ilość</label>
+                            <InputNumber class="form-control" id="amount" min="1" @bind-Value="Amount" />
+                        </div>
                         <button type="button" @onclick="@SubmitHandler" class="btn btn-primary" data-dismiss="modal">Zapisz i zamknij okno</button>
                     }
+                    <button type="button" @onclick="@SubmitHandler" class="btn btn-primary" data-dismiss="@(IsEdited == true ? "modal" : "")">Zapisz</button>
                     <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
                 </EditForm>
             </div>
@@ -81,6 +85,7 @@ else
     {
         ExpirationDate = DateTime.Today
     };
+    private int Amount = 1;
     private List<ProductDTO> ProductsList = new List<ProductDTO>();
     private bool IsEdited;
     private Filters Filter;
@@ -144,23 +149,51 @@ else
         }
         else
         {
-            int productId;
-            try
+            if (Amount > 1)
             {
-                productId = await Products.AddAsync(Product);
-            }
-            catch (InvalidProductDataException e)
-            {
-                await JsRuntime.InvokeVoidAsync("alert", e.Message);
-                return;
-            }
+                List<int> ids;
+                try
+                {
+                    ids = await Products.AddMultipleAsync(Product, Amount);
+                }
+                catch (ArgumentException e)
+                {
+                    await JsRuntime.InvokeVoidAsync("alert", e.Message);
+                    return;
+                }
 
-            Product.ID = productId;
-            ProductsList.Add(Product);
-            Product = new ProductDTO()
+                foreach (var id in ids)
+                {
+                    Product.ID = id;
+                    ProductsList.Add(Product);
+                }
+
+                Product = new ProductDTO()
+                {
+                    ExpirationDate = DateTime.Now
+                };
+                Amount = 1;
+            }
+            else
             {
-                ExpirationDate = DateTime.Now
-            };
+                int productId;
+                try
+                {
+                    productId = await Products.AddAsync(Product);
+                }
+                catch (InvalidProductDataException e)
+                {
+                    await JsRuntime.InvokeVoidAsync("alert", e.Message);
+                    return;
+                }
+
+                Product.ID = productId;
+                ProductsList.Add(Product);
+                Product = new ProductDTO()
+                {
+                    ExpirationDate = DateTime.Now
+                };
+            }
         }
 
         ProductsList = ProductsList.OrderBy(p => p.ExpirationDate).ToList();
@@ -174,6 +207,8 @@ else
             ExpirationDate = DateTime.Today
         };
         IsEdited = false;
+        Amount = 1;
+
     }
 
     private void EditProduct(int id)

@@ -52,6 +52,7 @@ namespace ExpirationDestroyerBlazorServer.BusinessLogic.ProductsService
 
             for (int i = 0; i < copies; i++)
             {
+                productModel.ID = 0;
                 var id = await _productsRepository.AddAsync(productModel);
                 outputList.Add(id);
             }
